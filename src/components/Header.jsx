@@ -76,30 +76,28 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg sticky top-0 z-50">
-      <nav className="container mx-auto px-4 py-3">
+   <header className="bg-gradient-to-r from-white via-[#50A8FF] via-[#007BFF] to-[#66CB67]">
+
+      <nav className="container px-4 py-3 mx-auto">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex-shrink-0">
             <a href="/" className="flex items-center group">
-              <div className="bg-white rounded-xl p-2 shadow-lg transform group-hover:scale-105 transition-transform duration-200">
+              <div className="p-2 transition-transform duration-200 transform group-hover:scale-105">
                 <img 
                   src="https://toyvista.com/images/logo.webp" 
                   alt="Toyvista Logo" 
-                  className="h-12 w-auto filter brightness-110 contrast-110"
+                  className="w-auto h-12 filter brightness-110 contrast-110"
                   onError={(e) => {
                     e.target.src = '/images/logo-fallback.png';
                   }}
                 />
               </div>
-              <span className="ml-3 text-white font-bold text-xl hidden sm:block">
-                ToyVista
-              </span>
+            
             </a>
           </div>
 
-          {/* Search Box */}
-          <div className="flex-1 max-w-2xl mx-4 lg:mx-8 relative" ref={searchRef}>
+          <div className="relative flex-1 max-w-2xl mx-4 lg:mx-8" ref={searchRef}>
             <form onSubmit={handleSearch} className="relative">
               <div className="relative">
                 <input
@@ -107,13 +105,13 @@ const Header = () => {
                   value={searchQuery}
                   onChange={handleSearchChange}
                   placeholder="Search for toys, games, and more..."
-                  className="w-full px-4 py-3 border-0 rounded-xl shadow-lg focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50 outline-none transition-all duration-200 placeholder-gray-500 text-gray-800"
+                  className="w-full px-4 py-3 text-gray-800 placeholder-gray-500 transition-all duration-200 border-0 shadow-lg outline-none rounded-xl focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50"
                   required
                   autoComplete="off"
                 />
                 <button
                   type="submit"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 p-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                  className="absolute p-2 text-gray-800 transition-colors duration-200 transform -translate-y-1/2 bg-yellow-400 rounded-lg shadow-md right-3 top-1/2 hover:bg-yellow-500 hover:shadow-lg"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -122,22 +120,21 @@ const Header = () => {
               </div>
             </form>
 
-            {/* Suggestions Box */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl mt-2 max-h-60 overflow-y-auto z-50">
+              <div className="absolute left-0 right-0 z-50 mt-2 overflow-y-auto bg-white border border-gray-200 shadow-2xl top-full rounded-xl max-h-60">
                 {suggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors duration-150 group"
+                    className="px-4 py-3 transition-colors duration-150 border-b border-gray-100 cursor-pointer hover:bg-blue-50 last:border-b-0 group"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
                     <div className="flex items-center">
-                      <div className="bg-blue-100 p-1 rounded-lg mr-3 group-hover:bg-blue-200 transition-colors">
+                      <div className="p-1 mr-3 transition-colors bg-blue-100 rounded-lg group-hover:bg-blue-200">
                         <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                       </div>
-                      <span className="text-gray-700 font-medium group-hover:text-blue-600 transition-colors">
+                      <span className="font-medium text-gray-700 transition-colors group-hover:text-blue-600">
                         {suggestion}
                       </span>
                     </div>
@@ -147,30 +144,29 @@ const Header = () => {
             )}
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="items-center hidden space-x-6 lg:flex">
             <a 
               href="/why-toyvista" 
-              className="text-white hover:text-yellow-300 font-semibold transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10"
+              className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
             >
               Why Toy Vista?
             </a>
             <a 
               href="/blogs" 
-              className="text-white hover:text-yellow-300 font-semibold transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10"
+              className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
             >
               Blogs
             </a>
             <a 
               href="/disclaimer" 
-              className="text-white hover:text-yellow-300 font-semibold transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10"
+              className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
             >
               Disclaimer
             </a>
-            <div className="w-px h-6 bg-white bg-opacity-30 mx-2"></div>
+            <div className="w-px h-6 mx-2 bg-white bg-opacity-30"></div>
             <a 
               href="/categories" 
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+              className="px-4 py-2 font-bold text-gray-800 transition-colors duration-200 bg-yellow-400 rounded-lg shadow-md hover:bg-yellow-500 hover:shadow-lg"
             >
               Shop Now
             </a>
@@ -180,10 +176,10 @@ const Header = () => {
           <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-3 rounded-xl bg-white bg-opacity-10 hover:bg-opacity-20 text-white transition-colors duration-200 shadow-md"
+              className="p-3 text-white transition-colors duration-200 bg-white shadow-md rounded-xl bg-opacity-10 hover:bg-opacity-20"
               aria-label="Toggle menu"
             >
-              <div className="w-6 h-6 flex flex-col justify-center space-y-1">
+              <div className="flex flex-col justify-center w-6 h-6 space-y-1">
                 <span className={`block h-0.5 w-6 bg-current transform transition duration-300 ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
                 <span className={`block h-0.5 w-6 bg-current transition duration-300 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`} />
                 <span className={`block h-0.5 w-6 bg-current transform transition duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
@@ -194,24 +190,24 @@ const Header = () => {
 
         {/* Mobile Navigation Menu */}
         <div className={`lg:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 space-y-3">
+          <div className="p-6 space-y-3 bg-white shadow-2xl rounded-2xl">
             <a 
               href="/why-toyvista" 
-              className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors duration-200 font-semibold border-l-4 border-blue-500"
+              className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
               onClick={() => setIsMenuOpen(false)}
             >
               Why Toy Vista?
             </a>
             <a 
               href="/blogs" 
-              className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors duration-200 font-semibold border-l-4 border-green-500"
+              className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-green-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
               onClick={() => setIsMenuOpen(false)}
             >
               Blogs
             </a>
             <a 
               href="/disclaimer" 
-              className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors duration-200 font-semibold border-l-4 border-purple-500"
+              className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-purple-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
               onClick={() => setIsMenuOpen(false)}
             >
               Disclaimer
@@ -219,7 +215,7 @@ const Header = () => {
             <div className="pt-2">
               <a 
                 href="/categories" 
-                className="block w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-800 font-bold py-3 px-4 rounded-xl text-center transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                className="block w-full px-4 py-3 font-bold text-center text-gray-800 transition-all duration-200 transform shadow-md bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 rounded-xl hover:shadow-lg hover:scale-105"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Shop All Categories

@@ -9,14 +9,12 @@ function Home() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {/* Your main content will go here */}
       <main>
-                <TrendingProducts />
+        <TrendingProducts />
         <Categories />
         <LatestBlogs />
         <Footer />
 
-        {/* Add your trending products, categories, and blog sections here */}
       </main>
     </div>
   )
