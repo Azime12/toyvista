@@ -4,7 +4,7 @@
 export const BASE_URL = "https://toyvista.com/api";
 // export const BASE_URL_FRONTEND = "http://localhost:5173";
 // export const BASE_URL_FRONTEND = "https://aacoders.aaitdb.gov.et";
-// export const BASE_URL_FRONTEND = "http://192.168.71.61:5173";
+export const BASE_URL_FRONTEND = "http://192.168.71.61:5173";
 // export const BASE_URL_FRONTEND = "192.168.71.61"
 
 
