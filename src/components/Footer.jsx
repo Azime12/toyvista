@@ -18,7 +18,6 @@ const Footer = () => {
   <h4 className="mb-4 text-lg font-semibold text-white">Sister Companies</h4>
   <div className="space-y-2">
     {[
-      { name: 'ToyVista', url: 'https://toyvista.com' },
       { name: 'Welness World', url: 'https://welnessworld.com' },
       { name: 'iShoez', url: 'https://ishoez.com' },
       { name: 'DGPick', url: 'https://dgpick.com' },
