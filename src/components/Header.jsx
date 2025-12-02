@@ -89,9 +89,9 @@ const Header = () => {
                   src="/public/images/logo.webp" 
                   alt="Toyvista Logo" 
                   className="w-auto h-12 filter brightness-110 contrast-110"
-                  onError={(e) => {
-                    e.target.src = '/images/logo-fallback.png';
-                  }}
+                  // onError={(e) => {
+                  //   e.target.src = '/images/logo-fallback.png';
+                  // }}
                 />
               </div>
             
