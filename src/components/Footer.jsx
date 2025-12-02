@@ -113,14 +113,14 @@ const Footer = () => {
             <div className="flex items-center gap-8 mt-8">
               <a href="#" className="flex-1">
                 <img 
-                  src="https://toyvista.com/images/ios.png" 
+                  src="/images/ios.png" 
                   alt="Download on App Store" 
                   className="w-full max-w-[180px] h-auto"
                 />
               </a>
               <a href="#" className="flex-1">
                 <img 
-                  src="https://toyvista.com/images/android.webp" 
+                  src="/images/android.webp" 
                   alt="Get it on Google Play" 
                   className="w-full max-w-[120px] h-auto"
                 />
@@ -160,7 +160,7 @@ const Footer = () => {
           width: 120px;
           height: 120px;
           border-radius: 50%;
-          background: url('https://toyvista.com/images/logo.jpeg') no-repeat center/contain;
+          background: url('/images/logo.jpeg') no-repeat center/contain;
           position: absolute;
           bottom: 10px;
           left: 0;

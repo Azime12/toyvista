@@ -1,7 +1,7 @@
 // export const BASE_URL = "http://localhost:5000/api";
 // export const BASE_URL = "http://192.168.71.61:5000/api";
 
-export const BASE_URL = "https://aacodersbackend.aaitdb.gov.et/api";
+export const BASE_URL = "http://localhost/toyvista/api";
 // export const BASE_URL_FRONTEND = "http://localhost:5173";
 export const BASE_URL_FRONTEND = "https://aacoders.aaitdb.gov.et";
 // export const BASE_URL_FRONTEND = "http://192.168.71.61:5173";

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -85,7 +86,7 @@ const Header = () => {
             <a href="/" className="flex items-center group">
               <div className="p-2 transition-transform duration-200 transform group-hover:scale-105">
                 <img 
-                  src="https://toyvista.com/images/logo.webp" 
+                  src="/public/images/logo.webp" 
                   alt="Toyvista Logo" 
                   className="w-auto h-12 filter brightness-110 contrast-110"
                   onError={(e) => {
@@ -143,34 +144,38 @@ const Header = () => {
               </div>
             )}
           </div>
+<div className="items-center hidden space-x-6 lg:flex">
+  <Link
+    to="/why-toyvista"
+    className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
+  >
+    Why Toy Vista?
+  </Link>
 
-          <div className="items-center hidden space-x-6 lg:flex">
-            <a 
-              href="/why-toyvista" 
-              className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
-            >
-              Why Toy Vista?
-            </a>
-            <a 
-              href="/blogs" 
-              className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
-            >
-              Blogs
-            </a>
-            <a 
-              href="/disclaimer" 
-              className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
-            >
-              Disclaimer
-            </a>
-            <div className="w-px h-6 mx-2 bg-white bg-opacity-30"></div>
-            <a 
-              href="/categories" 
-              className="px-4 py-2 font-bold text-gray-800 transition-colors duration-200 bg-yellow-400 rounded-lg shadow-md hover:bg-yellow-500 hover:shadow-lg"
-            >
-              Shop Now
-            </a>
-          </div>
+  <Link
+    to="/blogs"
+    className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
+  >
+    Blogs
+  </Link>
+
+  <Link
+    to="/disclaimer"
+    className="px-3 py-2 font-semibold text-white transition-colors duration-200 rounded-lg hover:text-yellow-300 hover:bg-white hover:bg-opacity-10"
+  >
+    Disclaimer
+  </Link>
+
+  <div className="w-px h-6 mx-2 bg-white bg-opacity-30"></div>
+
+  <Link
+    to="/categories"
+    className="px-4 py-2 font-bold text-gray-800 transition-colors duration-200 bg-yellow-400 rounded-lg shadow-md hover:bg-yellow-500 hover:shadow-lg"
+  >
+    Shop Now
+  </Link>
+</div>
+
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden">
@@ -189,40 +194,49 @@ const Header = () => {
         </div>
 
         {/* Mobile Navigation Menu */}
-        <div className={`lg:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-          <div className="p-6 space-y-3 bg-white shadow-2xl rounded-2xl">
-            <a 
-              href="/why-toyvista" 
-              className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Why Toy Vista?
-            </a>
-            <a 
-              href="/blogs" 
-              className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-green-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blogs
-            </a>
-            <a 
-              href="/disclaimer" 
-              className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-purple-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Disclaimer
-            </a>
-            <div className="pt-2">
-              <a 
-                href="/categories" 
-                className="block w-full px-4 py-3 font-bold text-center text-gray-800 transition-all duration-200 transform shadow-md bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 rounded-xl hover:shadow-lg hover:scale-105"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Shop All Categories
-              </a>
-            </div>
-          </div>
-        </div>
+      {/* Mobile Navigation Menu */}
+<div
+  className={`lg:hidden transition-all duration-300 ease-in-out ${
+    isMenuOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 overflow-hidden'
+  }`}
+>
+  <div className="p-6 space-y-3 bg-white shadow-2xl rounded-2xl">
+    <Link
+      to="/why-toyvista"
+      className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      Why Toy Vista?
+    </Link>
+
+    <Link
+      to="/blogs"
+      className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-green-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      Blogs
+    </Link>
+
+    <Link
+      to="/disclaimer"
+      className="block px-4 py-3 font-semibold text-gray-700 transition-colors duration-200 border-l-4 border-purple-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      Disclaimer
+    </Link>
+
+    <div className="pt-2">
+      <Link
+        to="/categories"
+        className="block w-full px-4 py-3 font-bold text-center text-gray-800 transition-all duration-200 transform shadow-md bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 rounded-xl hover:shadow-lg hover:scale-105"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        Shop All Categories
+      </Link>
+    </div>
+  </div>
+</div>
+
       </nav>
     </header>
   );
