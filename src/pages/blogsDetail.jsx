@@ -236,41 +236,14 @@ const BlogDetail = () => {
               </Link>
             </div>
 
-            {/* Article Header */}
             <div className="mb-8">
-              {/* <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-xl">
-                <Tag className="w-4 h-4 text-emerald-600" />
-                <span className="text-sm font-semibold text-emerald-700">{blog.category}</span>
-              </div> */}
+              
               <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl lg:text-5xl">
                 {blog.title}
               </h1>
               
               <div className="flex flex-wrap items-center justify-between gap-4 p-6 bg-white shadow-lg rounded-2xl">
-                {/* <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="flex items-center justify-center rounded-full w-14 h-14 bg-gradient-to-br from-emerald-500 to-blue-500">
-                      <User className="text-white w-7 h-7" />
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Admin</p>
-                    <p className="text-sm text-gray-600">Published on {blog.formattedDate}</p>
-                  </div>
-                </div> */}
-                
-                {/* <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">{blog.wordCount.toLocaleString()}</p>
-                    <p className="text-sm text-gray-600">Words</p>
-                  </div>
-                  <div className="w-px h-8 bg-gray-300"></div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">{blog.readTime}</p>
-                    <p className="text-sm text-gray-600">Read Time</p>
-                  </div>
-                </div> */}
+            
               </div>
             </div>
 
@@ -278,6 +251,7 @@ const BlogDetail = () => {
             {blog.image_url && (
               <div className="relative mb-8 overflow-hidden shadow-2xl rounded-2xl group">
                 <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/30 to-transparent"></div>
+                
                 <img
                   src={blog.image_url}
                   alt={blog.title}
@@ -292,26 +266,44 @@ const BlogDetail = () => {
               </div>
             )}
 
-            {/* Article Content */}
-            <article className="p-8 mb-8 bg-white shadow-lg rounded-2xl">
-              <div 
-                className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-emerald-600 hover:prose-a:text-emerald-700 prose-img:rounded-xl prose-img:shadow-lg"
-                dangerouslySetInnerHTML={{ __html: blog.content }}
+          <article className="p-8 mb-8 bg-white shadow-lg rounded-2xl">
+              <div
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    blog.content
+
+                      /** 🔥 FIX 1: `<img alt="Something" />` with no src */
+                      .replace(/<img([^>]+)alt="([^"]+)"([^>]*)\/?>/g, (match, before, alt, after) => {
+                        return `
+                          <img 
+                            src="https://st2.depositphotos.com/4431055/11473/i/450/depositphotos_114730670-stock-illustration-toys-collection-isolated.jpg"
+                            alt="${alt}"
+                            class="rounded-xl shadow-lg my-4"
+                          />
+                        `;
+                      })
+
+                      /** 🔥 FIX 2: src="" empty images */
+                      .replace(/<img([^>]+)src=""([^>]*)>/g, (match, b, a) => {
+                        return `
+                          <img 
+                            ${b} 
+                            src="https://st2.depositphotos.com/4431055/11473/i/450/depositphotos_114730670-stock-illustration-toys-collection-isolated.jpg"
+                            ${a}
+                          />
+                        `;
+                      })
+                }}
               />
-              
+
               {/* Tags */}
-              {blog.tags && blog.tags.length > 0 && (
+              {blog.tags?.length > 0 && (
                 <div className="pt-8 mt-8 border-t border-gray-200">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Layers className="w-5 h-5 text-emerald-600" />
-                    <h3 className="font-semibold text-gray-900">Article Tags</h3>
-                  </div>
+                  <h3 className="mb-4 font-semibold text-gray-900">Article Tags</h3>
                   <div className="flex flex-wrap gap-2">
-                    {blog.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 text-sm font-medium transition-colors border rounded-full cursor-pointer text-emerald-700 bg-emerald-50 border-emerald-100 hover:bg-emerald-100"
-                      >
+                    {blog.tags.map((tag, i) => (
+                      <span key={i} className="px-4 py-2 text-sm font-medium border rounded-full bg-emerald-50 text-emerald-700 border-emerald-100">
                         #{tag}
                       </span>
                     ))}
@@ -453,8 +445,7 @@ const BlogDetail = () => {
                 ))}
               </div>
             </div>
-
-        
+       
             
           </div>
         </div>

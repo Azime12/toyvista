@@ -65,7 +65,7 @@ const ProductSearchResults = () => {
         {/* Header */}
         <div className="flex flex-col items-center justify-center gap-5 mb-8 sm:flex-row">
           <h2 className="text-2xl font-bold text-center text-gray-900">
-            Search Results for <span className="text-blue-600">"{keyword}"</span>
+            {/* Search Results for <span className="text-blue-600">"{keyword}"</span> */}
           </h2>
           <button
             onClick={() => navigate("/")}
@@ -76,7 +76,7 @@ const ProductSearchResults = () => {
         </div>
 
         {/* Messages */}
-        {loading && <p className="text-center text-gray-600">Loading...</p>}
+        {loading && <p className="text-center text-gray-600">Searching...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
 
         {/* PRODUCT GRID FIXED */}
