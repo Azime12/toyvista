@@ -1,480 +1,464 @@
-// src/pages/BlogDetail.jsx
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import { Calendar, Clock, User, Tag, ArrowLeft, Share2, Facebook, Twitter, Linkedin, Mail, BookOpen } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useLocation, Link, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { 
+  Calendar, 
+  Clock, 
+  ArrowLeft, 
+  Share2, 
+  Bookmark, 
+  User, 
+  Tag, 
+  Facebook, 
+  Twitter, 
+  Linkedin,
+  MessageSquare,
+  Eye,
+  ChevronRight,
+  Home,
+  Layers
+} from 'lucide-react';
 import { BASE_URL } from '../constants/apiTags';
 
 const BlogDetail = () => {
-  const { slug } = useParams();
   const location = useLocation();
+  const { slug } = useParams();
   const [blog, setBlog] = useState(null);
+  const [recentBlogs, setRecentBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [relatedBlogs, setRelatedBlogs] = useState([]);
-  const [shareMenuOpen, setShareMenuOpen] = useState(false);
 
+  // Format a blog with date and readTime
+  const formatBlog = (b) => {
+    if (!b) return null;
+    
+    const cleanContent = b.content ? b.content.replace(/<[^>]*>/g, '') : '';
+    const estimatedReadTime = Math.max(1, Math.ceil(cleanContent.split(/\s+/).length / 200));
+    
+    return {
+      ...b,
+      cleanContent: cleanContent,
+      date: b.created_at
+        ? new Date(b.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : 'Recent',
+      formattedDate: b.created_at
+        ? new Date(b.created_at).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : 'Recent',
+      readTime: `${estimatedReadTime} min read`,
+      category: extractFirstTag(b.content) || 'General',
+      tags: extractTags(b.content),
+      wordCount: cleanContent.split(/\s+/).length,
+    };
+  };
+
+  const extractFirstTag = (content) => {
+    const match = content?.match(/<(\w+)[^>]*>/);
+    return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : 'General';
+  };
+
+  const extractTags = (content) => {
+    const tags = [];
+    const tagRegex = /<(\w+)[^>]*>/g;
+    let match;
+    while ((match = tagRegex.exec(content || '')) !== null && tags.length < 5) {
+      const tagName = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+      if (!tags.includes(tagName) && tagName.length < 15) {
+        tags.push(tagName);
+      }
+    }
+    return tags.length > 0 ? tags : ['General', 'Blog', 'Article'];
+  };
+
+  const calculateReadTime = (content) => {
+    const text = content?.replace(/<[^>]*>/g, '') || '';
+    const wordsPerMinute = 200;
+    const words = text.split(/\s+/).length;
+    return `${Math.max(1, Math.ceil(words / wordsPerMinute))} min read`;
+  };
+
+  // Load current blog
   useEffect(() => {
-    const fetchBlogData = async () => {
+    const fetchBlog = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        
-        // First, check if blog data was passed via state
+        // First try to get from state
         const blogFromState = location.state?.blog;
-        
         if (blogFromState) {
-          // Use data from state if available
-          setBlog(blogFromState);
+          setBlog(formatBlog(blogFromState));
         } else {
-          // Fetch blog by slug from API
+          // If not in state, fetch all blogs and find by slug
           const response = await axios.get(`${BASE_URL}/blogs.php`);
-          
           if (response.data && Array.isArray(response.data)) {
             const foundBlog = response.data.find(b => b.slug === slug);
-            
-            if (foundBlog) {
-              setBlog({
-                ...foundBlog,
-                date: foundBlog.created_at ? new Date(foundBlog.created_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                }) : 'Recent',
-                readTime: calculateReadTime(foundBlog.content || ''),
-                category: 'Blog'
-              });
-            } else {
-              // Fallback to sample blog
-              setBlog(getSampleBlog());
-            }
-          } else {
-            // Fallback to sample blog
-            setBlog(getSampleBlog());
+            setBlog(formatBlog(foundBlog || null));
           }
         }
-
-        // Fetch related blogs
-        const relatedResponse = await axios.get(`${BASE_URL}/blogs.php`);
-        if (relatedResponse.data && Array.isArray(relatedResponse.data)) {
-          const related = relatedResponse.data
-            .filter(b => b.slug !== slug)
-            .slice(0, 3)
-            .map(b => ({
-              id: b.id,
-              title: b.title,
-              slug: b.slug,
-              excerpt: b.content ? 
-                (b.content.length > 100 ? b.content.substring(0, 100) + '...' : b.content) 
-                : 'Read more...',
-              image: b.image_url || 'https://images.unsplash.com/photo-1545235617-9465d2a55698?w=500&auto=format&fit=crop',
-              date: b.created_at ? new Date(b.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              }) : 'Recent'
-            }));
-          setRelatedBlogs(related);
-        } else {
-          setRelatedBlogs(getSampleRelatedBlogs());
-        }
-
-      } catch (err) {
-        console.error('Error fetching blog:', err);
-        setBlog(getSampleBlog());
-        setRelatedBlogs(getSampleRelatedBlogs());
+      } catch (error) {
+        console.error('Error fetching blog:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlogData();
-  }, [slug, location.state]);
+    fetchBlog();
+  }, [location.state, slug]);
 
-  const calculateReadTime = (content) => {
-    const wordsPerMinute = 200;
-    const words = content.split(/\s+/).length;
-    const minutes = Math.ceil(words / wordsPerMinute);
-    return `${minutes} min read`;
+  // Fetch recent blogs
+  useEffect(() => {
+    const fetchRecentBlogs = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/blogs.php`);
+        if (res.data && Array.isArray(res.data)) {
+          const sorted = res.data
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 6)
+            .map(formatBlog);
+          setRecentBlogs(sorted.filter(b => b && b.id !== blog?.id));
+          
+          // Set related blogs (excluding current and recent)
+          if (blog) {
+            const related = res.data
+              .filter(b => b.id !== blog.id && b.id !== sorted[0]?.id)
+              .slice(0, 3)
+              .map(formatBlog);
+            setRelatedBlogs(related);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching recent blogs:', err);
+      }
+    };
+    
+    if (!loading) {
+      fetchRecentBlogs();
+    }
+  }, [blog, loading]);
+
+  const shareBlog = (platform) => {
+    const url = window.location.href;
+    const title = blog?.title || '';
+    const text = blog?.cleanContent?.substring(0, 100) || '';
+    
+    const shareUrls = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+    };
+    
+    if (shareUrls[platform]) {
+      window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+    }
   };
 
-  const getSampleBlog = () => ({
-    id: 1,
-    title: "Girls Demon Hunter Pop Singer Costume Set – Rumi, Mira & Zoey Cosplay for Halloween & Dance",
-    slug: "girls-demon-hunter-pop-singer-costume-set-rumi-mira-zoey-cosplay",
-    content: `<h1>Girls Demon Hunter Pop Singer Costume Set – Rumi, Mira & Zoey Cosplay for Halloween & Dance</h1>
-<p><strong>Slug:</strong> girls-demon-hunter-pop-singer-costume-set-rumi-mira-zoey-cosplay</p>
-
-<p>Unleash your inner K-pop idol this Halloween with the <strong>Girls Demon Hunter Pop Singer Costume Set</strong>, inspired by the fierce trio from Netflix's animated hit <em>KPop Demon Hunters</em>. Whether you're channeling Rumi's fiery spirit, Mira's edgy style, or Zoey's cool confidence, this costume set brings the magic of HUNTR/X to life.</p>
-
-<h2>Costume Options</h2>
-<ul>
-  <li><strong>Rumi:</strong> A 3-piece ensemble featuring a cropped jacket, vest, and shorts, capturing Rumi's bold and rebellious look.</li>
-  <li><strong>Mira:</strong> A 2-piece outfit with a graphic tee and culottes, reflecting Mira's chic and confident style.</li>
-  <li><strong>Zoey:</strong> A 2-piece set including a sleeveless top and pants, embodying Zoey's laid-back yet powerful presence.</li>
-</ul>
-
-<h2>Why Choose This Costume?</h2>
-<p>This costume set stands out for its:</p>
-<ul>
-  <li><strong>Authentic Design:</strong> Carefully crafted to replicate the original characters, ensuring a realistic role-playing experience.</li>
-  <li><strong>Versatility:</strong> Perfect for Halloween parties, cosplay events, dance performances, and themed gatherings.</li>
-  <li><strong>Quality Materials:</strong> Made with comfortable fabrics suitable for extended wear during events and performances.</li>
-</ul>
-
-<h2>Tips for Styling</h2>
-<ul>
-  <li><strong>Accessorize:</strong> Enhance your look with themed accessories like wigs, gloves, or boots to match your chosen character.</li>
-  <li><strong>Pair with Makeup:</strong> Use makeup to accentuate the character's features, such as bold eyeliner for Rumi or subtle shimmer for Zoey.</li>
-  <li><strong>Practice Your Moves:</strong> Watch clips from <em>KPop Demon Hunters</em> to mimic the characters' signature dance moves and poses.</li>
-</ul>
-
-<p>Embrace your favorite HUNTR/X member and make this Halloween unforgettable with the <strong>Girls Demon Hunter Pop Singer Costume Set</strong>. Step into the world of K-pop and demon hunting with style and confidence.</p>`,
-    image: "https://images-na.ssl-images-amazon.com/images/I/71xhWiOz0YL._AC_UL900_SR900,600_.jpg",
-    date: "October 13, 2025",
-    readTime: "7 min read",
-    category: "Costumes",
-    author: "ToyVista Team"
-  });
-
-  const getSampleRelatedBlogs = () => [
-    {
-      id: 2,
-      title: "Best Halloween Costumes for Kids 2025",
-      slug: "best-halloween-costumes-for-kids-2025",
-      excerpt: "Discover the most popular and creative Halloween costumes for children this year.",
-      image: "https://images.unsplash.com/photo-1534188753412-9f0337d5dcce?w=500&auto=format&fit=crop",
-      date: "Oct 10, 2025"
-    },
-    {
-      id: 3,
-      title: "K-Pop Inspired Fashion for Teens",
-      slug: "kpop-inspired-fashion-for-teens",
-      excerpt: "Explore the latest K-pop fashion trends that your teens will love.",
-      image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&auto=format&fit=crop",
-      date: "Oct 5, 2025"
-    },
-    {
-      id: 4,
-      title: "DIY Costume Ideas on a Budget",
-      slug: "diy-costume-ideas-on-a-budget",
-      excerpt: "Create amazing costumes without breaking the bank with these creative ideas.",
-      image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=500&auto=format&fit=crop",
-      date: "Sep 28, 2025"
-    }
-  ];
-
-  const handleShare = (platform) => {
-    const url = window.location.href;
-    const title = blog?.title || 'Check out this blog post';
-    
-    switch (platform) {
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
-        break;
-      case 'linkedin':
-        window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, '_blank');
-        break;
-      case 'email':
-        window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`Check out this blog post: ${url}`)}`;
-        break;
-      default:
-        navigator.clipboard.writeText(url);
-        alert('Link copied to clipboard!');
-    }
-    setShareMenuOpen(false);
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard!');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container flex flex-col items-center justify-center min-h-screen px-4 mx-auto">
-          <div className="w-16 h-16 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-          <p className="mt-4 text-gray-600">Loading blog post...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 rounded-full border-emerald-200 border-t-emerald-600 animate-spin"></div>
+          <div className="absolute inset-0 border-4 rounded-full border-emerald-100 animate-ping"></div>
         </div>
+        <p className="mt-4 text-lg font-medium text-gray-700">Loading article...</p>
       </div>
     );
   }
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container px-4 py-16 mx-auto text-center">
-          <h1 className="mb-4 text-3xl font-bold text-gray-900">Blog Post Not Found</h1>
-          <p className="mb-8 text-gray-600">The blog post you're looking for doesn't exist.</p>
-          <Link
-            to="/blogs"
-            className="inline-flex items-center px-6 py-3 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Blogs
-          </Link>
+      <div className="flex flex-col items-center justify-center min-h-screen text-center bg-gradient-to-br from-gray-50 to-red-50">
+        <div className="p-6 mb-6 bg-white shadow-lg rounded-2xl">
+          <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-100 to-red-200">
+            <Bookmark className="w-10 h-10 text-red-500" />
+          </div>
+          <h1 className="mb-4 text-3xl font-bold text-gray-900">Article Not Found</h1>
+          <p className="max-w-md mb-8 text-gray-600">
+            The article you're looking for doesn't exist or has been moved.
+          </p>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Link
+              to="/blogs"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white transition-all duration-300 bg-emerald-600 rounded-xl hover:bg-emerald-700"
+            >
+              <ArrowLeft className="w-5 h-5" /> Browse All Articles
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-gray-700 transition-all duration-300 bg-gray-100 rounded-xl hover:bg-gray-200"
+            >
+              <Home className="w-5 h-5" /> Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Blog Header */}
-      <div className="relative ">
-        <div className="absolute inset-0 "></div>
-        <div className="container relative px-2 py-5 mx-auto md:py-4">
-          <div className="max-w-4xl mx-auto">
-            <Link
-              to="/blogs"
-              className="inline-flex items-center mb-6 text-gray-900 hover:text-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Blogs
-            </Link>
-            
-            {/* <div className="mb-4">
-              <span className="px-3 py-1 text-sm font-medium text-gray-900 rounded-full ">
-                {blog.category}
-              </span>
-            </div> */}
-            
-            <h1 className="mb-6 text-xl font-bold text-gray-900 md:text-2xl lg:text-2xl">
-              {blog.title}
-            </h1>
-            
-            <div className="flex flex-wrap items-center gap-6 text-white/90">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                <span>{blog.date}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                <span>{blog.readTime}</span>
-              </div>
-              {/* {blog.author && (
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  <span>By {blog.author}</span>
-                </div>
-              )} */}
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-emerald-50">
+      {/* Navigation Breadcrumbs */}
+      <div className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur-lg">
+        <div className="container px-4 py-4 mx-auto">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Link to="/" className="transition-colors hover:text-emerald-600">Home</Link>
+            <ChevronRight className="w-4 h-4" />
+            <Link to="/blogs" className="transition-colors hover:text-emerald-600">Blog</Link>
+            <ChevronRight className="w-4 h-4" />
+            <span className="font-medium text-gray-900 truncate">{blog.title}</span>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="container px-4 py-8 mx-auto md:py-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {/* Blog Content */}
-            <div className="lg:col-span-2">
-              {/* Featured Image */}
-              <div className="mb-8 overflow-hidden shadow-xl rounded-2xl">
-                <img
-                  src={blog.image}
-                  alt={blog.title}
-                  className="object-cover w-full h-auto max-h-96"
-                  onError={(e) => {
-                    e.target.src = 'https://images.unsplash.com/photo-1545235617-9465d2a55698?w=1200&auto=format&fit=crop';
-                  }}
-                />
-              </div>
+      <div className="container max-w-6xl px-4 py-8 mx-auto md:px-6">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            {/* Back Button */}
+            <div className="mb-8">
+              <Link
+                to="/blogs"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 group"
+              >
+                <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                Back to All Articles
+              </Link>
+            </div>
 
-              {/* Blog Content */}
-              <article className="p-6 bg-white shadow-lg rounded-2xl">
-                <div 
-                  className="prose prose-lg max-w-none"
-                  dangerouslySetInnerHTML={{ __html: blog.content }}
-                />
-              </article>
-
-              {/* Share Section */}
-              <div className="p-6 mt-8 bg-white shadow-lg rounded-2xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Share this post</h3>
-                    <p className="text-gray-600">Help others discover this content</p>
-                  </div>
+            {/* Article Header */}
+            <div className="mb-8">
+              {/* <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-xl">
+                <Tag className="w-4 h-4 text-emerald-600" />
+                <span className="text-sm font-semibold text-emerald-700">{blog.category}</span>
+              </div> */}
+              <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl lg:text-5xl">
+                {blog.title}
+              </h1>
+              
+              <div className="flex flex-wrap items-center justify-between gap-4 p-6 bg-white shadow-lg rounded-2xl">
+                {/* <div className="flex items-center gap-4">
                   <div className="relative">
-                    <button
-                      onClick={() => setShareMenuOpen(!shareMenuOpen)}
-                      className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
-                    >
-                      <Share2 className="w-5 h-5" />
-                      Share
-                    </button>
-                    
-                    {shareMenuOpen && (
-                      <div className="absolute right-0 z-10 w-48 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg top-full">
-                        <button
-                          onClick={() => handleShare('copy')}
-                          className="flex items-center w-full gap-3 px-4 py-3 text-left hover:bg-gray-50"
-                        >
-                          <span className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
-                            🔗
-                          </span>
-                          <span>Copy Link</span>
-                        </button>
-                        <button
-                          onClick={() => handleShare('facebook')}
-                          className="flex items-center w-full gap-3 px-4 py-3 text-left hover:bg-gray-50"
-                        >
-                          <Facebook className="w-5 h-5 text-blue-600" />
-                          <span>Share on Facebook</span>
-                        </button>
-                        <button
-                          onClick={() => handleShare('twitter')}
-                          className="flex items-center w-full gap-3 px-4 py-3 text-left hover:bg-gray-50"
-                        >
-                          <Twitter className="w-5 h-5 text-blue-400" />
-                          <span>Share on Twitter</span>
-                        </button>
-                        <button
-                          onClick={() => handleShare('email')}
-                          className="flex items-center w-full gap-3 px-4 py-3 text-left hover:bg-gray-50"
-                        >
-                          <Mail className="w-5 h-5 text-gray-600" />
-                          <span>Share via Email</span>
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-center rounded-full w-14 h-14 bg-gradient-to-br from-emerald-500 to-blue-500">
+                      <User className="text-white w-7 h-7" />
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                   </div>
-                </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Admin</p>
+                    <p className="text-sm text-gray-600">Published on {blog.formattedDate}</p>
+                  </div>
+                </div> */}
+                
+                {/* <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-900">{blog.wordCount.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">Words</p>
+                  </div>
+                  <div className="w-px h-8 bg-gray-300"></div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-900">{blog.readTime}</p>
+                    <p className="text-sm text-gray-600">Read Time</p>
+                  </div>
+                </div> */}
               </div>
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Author Info */}
-              <div className="p-6 bg-white shadow-lg rounded-2xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
-                    <BookOpen className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">ToyVista Blog</h4>
-                    <p className="text-sm text-gray-600">Your trusted source for toy reviews and guides</p>
+            {/* Featured Image */}
+            {blog.image_url && (
+              <div className="relative mb-8 overflow-hidden shadow-2xl rounded-2xl group">
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <img
+                  src={blog.image_url}
+                  alt={blog.title}
+                  className="object-cover w-full h-[400px] transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute z-20 bottom-6 left-6">
+                  <div className="flex items-center gap-2 text-white/90">
+                    <Eye className="w-5 h-5" />
+                    <span className="text-sm font-medium">Featured Image</span>
                   </div>
                 </div>
-                <p className="text-gray-700">
-                  We're passionate about helping you find the best toys and products for your family.
-                </p>
               </div>
+            )}
 
-              {/* Related Blogs */}
-              {relatedBlogs.length > 0 && (
-                <div className="p-6 bg-white shadow-lg rounded-2xl">
-                  <h3 className="mb-4 text-lg font-semibold text-gray-900">Related Articles</h3>
-                  <div className="space-y-4">
-                    {relatedBlogs.map((related) => (
-                      <Link
-                        key={related.id}
-                        to={`/blog/${related.slug}`}
-                        className="block group"
+            {/* Article Content */}
+            <article className="p-8 mb-8 bg-white shadow-lg rounded-2xl">
+              <div 
+                className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-emerald-600 hover:prose-a:text-emerald-700 prose-img:rounded-xl prose-img:shadow-lg"
+                dangerouslySetInnerHTML={{ __html: blog.content }}
+              />
+              
+              {/* Tags */}
+              {blog.tags && blog.tags.length > 0 && (
+                <div className="pt-8 mt-8 border-t border-gray-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Layers className="w-5 h-5 text-emerald-600" />
+                    <h3 className="font-semibold text-gray-900">Article Tags</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {blog.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-2 text-sm font-medium transition-colors border rounded-full cursor-pointer text-emerald-700 bg-emerald-50 border-emerald-100 hover:bg-emerald-100"
                       >
-                        <div className="flex gap-3">
-                          <div className="flex-shrink-0">
-                            <img
-                              src={related.image}
-                              alt={related.title}
-                              className="object-cover w-16 h-16 rounded-lg"
-                            />
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900 group-hover:text-blue-600 line-clamp-2">
-                              {related.title}
-                            </h4>
-                            <p className="text-xs text-gray-500">{related.date}</p>
-                          </div>
-                        </div>
-                      </Link>
+                        #{tag}
+                      </span>
                     ))}
                   </div>
                 </div>
               )}
+            </article>
 
-              {/* Categories */}
-              <div className="p-6 bg-white shadow-lg rounded-2xl">
-                <h3 className="mb-4 text-lg font-semibold text-gray-900">Categories</h3>
-                <div className="flex flex-wrap gap-2">
-                  {['Toys', 'Educational', 'Gaming', 'STEM', 'Costumes', 'Reviews'].map((cat) => (
-                    <span
-                      key={cat}
-                      className="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
-                    >
-                      {cat}
-                    </span>
-                  ))}
+            {/* Share Section */}
+            <div className="p-6 mb-8 border border-gray-200 bg-gradient-to-r from-gray-50 to-emerald-50 rounded-2xl">
+              <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+                <div>
+                  <h3 className="mb-2 text-lg font-semibold text-gray-900">Share this article</h3>
+                  <p className="text-gray-600">Help others discover this content</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => shareBlog('facebook')}
+                    className="p-3 text-blue-600 transition-colors bg-blue-100 rounded-xl hover:bg-blue-200"
+                    title="Share on Facebook"
+                  >
+                    <Facebook className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => shareBlog('twitter')}
+                    className="p-3 transition-colors bg-sky-100 text-sky-600 rounded-xl hover:bg-sky-200"
+                    title="Share on Twitter"
+                  >
+                    <Twitter className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => shareBlog('linkedin')}
+                    className="p-3 text-blue-700 transition-colors bg-blue-200 rounded-xl hover:bg-blue-300"
+                    title="Share on LinkedIn"
+                  >
+                    <Linkedin className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={copyToClipboard}
+                    className="p-3 text-gray-700 transition-colors bg-gray-100 rounded-xl hover:bg-gray-200"
+                    title="Copy link"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    className="p-3 transition-colors bg-emerald-100 text-emerald-600 rounded-xl hover:bg-emerald-200"
+                    title="Save for later"
+                  >
+                    <Bookmark className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </main>
 
-      {/* Newsletter */}
-      {/* <div className="bg-gradient-to-r from-blue-50 to-indigo-50">
-        <div className="container px-4 py-12 mx-auto">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="mb-4 text-2xl font-bold text-gray-900">Subscribe to Our Newsletter</h3>
-            <p className="mb-6 text-gray-600">
-              Get the latest toy reviews, parenting tips, and exclusive deals delivered to your inbox.
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-grow px-4 py-3 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button className="px-6 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">
-                Subscribe
-              </button>
+            {/* Related Articles */}
+            {relatedBlogs.length > 0 && (
+              <div className="mb-12">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Related Articles</h2>
+                  <Link 
+                    to="/blogs" 
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                  >
+                    View All <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  {relatedBlogs.map((relatedBlog) => (
+                    <Link
+                      key={relatedBlog.id}
+                      to={`/blog/${relatedBlog.slug}`}
+                      state={{ blog: relatedBlog }}
+                      className="block overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1 group"
+                    >
+                      <div className="relative h-40 overflow-hidden rounded-t-2xl">
+                        <img
+                          src={relatedBlog.image_url}
+                          alt={relatedBlog.title}
+                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                      </div>
+                      <div className="p-5">
+                        <h3 className="mb-2 font-bold text-gray-900 line-clamp-2 group-hover:text-emerald-700">
+                          {relatedBlog.title}
+                        </h3>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {relatedBlog.date}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {relatedBlog.readTime}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+           
+
+            {/* Recent Articles */}
+            <div className="p-6 bg-white border border-gray-100 shadow-lg rounded-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-emerald-100">
+                  <Calendar className="w-5 h-5 text-emerald-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Recent Articles</h3>
+              </div>
+              <div className="space-y-4">
+                {recentBlogs.slice(0, 5).map((recentBlog) => (
+                  <Link
+                    key={recentBlog.id}
+                    to={`/blog/${recentBlog.slug}`}
+                    state={{ blog: recentBlog }}
+                    className="flex items-start gap-3 p-3 transition-colors rounded-xl hover:bg-gray-50 group"
+                  >
+                    <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg">
+                      <img
+                        src={recentBlog.image_url}
+                        alt={recentBlog.title}
+                        className="object-cover w-full h-full transition-transform group-hover:scale-110"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 line-clamp-2 group-hover:text-emerald-700">
+                        {recentBlog.title}
+                      </h4>
+                      
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
+
+        
+            
           </div>
         </div>
-      </div> */}
-
-      <style jsx>{`
-        .prose h1 {
-          font-size: 2rem;
-          font-weight: bold;
-          margin-bottom: 1rem;
-          color: #1f2937;
-        }
-        .prose h2 {
-          font-size: 1.5rem;
-          font-weight: bold;
-          margin-top: 2rem;
-          margin-bottom: 1rem;
-          color: #374151;
-        }
-        .prose h3 {
-          font-size: 1.25rem;
-          font-weight: bold;
-          margin-top: 1.5rem;
-          margin-bottom: 0.75rem;
-          color: #4b5563;
-        }
-        .prose p {
-          margin-bottom: 1rem;
-          line-height: 1.7;
-          color: #4b5563;
-        }
-        .prose ul {
-          margin-bottom: 1rem;
-          padding-left: 1.5rem;
-          list-style-type: disc;
-        }
-        .prose li {
-          margin-bottom: 0.5rem;
-          line-height: 1.6;
-        }
-        .prose strong {
-          font-weight: bold;
-          color: #1f2937;
-        }
-        .prose em {
-          font-style: italic;
-        }
-      `}</style>
+      </div>
     </div>
   );
 };

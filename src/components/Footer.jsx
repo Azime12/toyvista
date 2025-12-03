@@ -3,7 +3,7 @@ const Footer = () => {
     <footer className="text-white bg-gray-900">
       {/* Footer Top Section */}
       <div className="container px-4 py-8 mx-auto">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 xs:justify-center md:grid-cols-2 lg:grid-cols-4">
           
           {/* Logo Section with Animation */}
           <div className="logo-footer">
@@ -166,7 +166,7 @@ const Footer = () => {
           position: absolute;
           bottom: 10px;
           left: 0;
-          animation: roll 4s linear infinite alternate;
+          animation: roll 3s linear infinite alternate;
         }
 
         @keyframes roll {

@@ -19,19 +19,21 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsMenuOpen(false); // close menu after searching
     }
   };
 
   return (
     <header className="bg-gradient-to-r from-white via-[#50A8FF] via-[#007BFF] to-[#66CB67] sticky top-0 z-50">
       <nav className="container flex items-center justify-between px-4 py-3 mx-auto">
+        
         {/* Logo */}
         <Link to="/" className="flex items-center">
           <img src="/images/logo.webp" alt="Toyvista Logo" className="w-auto h-12" />
         </Link>
 
-        {/* Search */}
-        <div className="flex-1 max-w-xl mx-4">
+        {/* Desktop Search */}
+        <div className="flex-1 hidden max-w-xl mx-4 lg:block">
           <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
@@ -59,16 +61,57 @@ const Header = () => {
 
         {/* Mobile Menu Button */}
         <div className="lg:hidden">
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-3 text-white">☰</button>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-3 text-2xl text-white">
+            ☰
+          </button>
         </div>
       </nav>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="p-4 space-y-2 bg-white shadow-2xl lg:hidden rounded-xl">
-          <Link to="/why-toyvista" className="block px-4 py-2" onClick={() => setIsMenuOpen(false)}>Why Toy Vista?</Link>
-          <Link to="/blogs" className="block px-4 py-2" onClick={() => setIsMenuOpen(false)}>Blogs</Link>
-          <Link to="/disclaimer" className="block px-4 py-2" onClick={() => setIsMenuOpen(false)}>Disclaimer</Link>
+        <div className="p-4 space-y-4 bg-white shadow-2xl lg:hidden rounded-xl">
+          
+          {/* Mobile Search */}
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
+              className="w-full px-4 py-3 border shadow rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              type="submit"
+              className="absolute p-2 text-gray-800 -translate-y-1/2 bg-yellow-400 rounded-lg top-1/2 right-3 hover:bg-yellow-500"
+            >
+              🔍
+            </button>
+          </form>
+
+          {/* Mobile Links */}
+          <Link
+            to="/why-toyvista"
+            className="block px-4 py-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Why Toy Vista?
+          </Link>
+
+          <Link
+            to="/blogs"
+            className="block px-4 py-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Blogs
+          </Link>
+
+          <Link
+            to="/disclaimer"
+            className="block px-4 py-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Disclaimer
+          </Link>
         </div>
       )}
     </header>
