@@ -195,7 +195,7 @@ export default function ProductList() {
   )}
 
   {/* Empty State */}
-  {paginatedProducts.length === 0 && (
+  {paginatedProducts.length === 0 &&  (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="w-24 h-24 mb-6 text-[#50A8FF]">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
