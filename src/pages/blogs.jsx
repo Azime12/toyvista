@@ -20,6 +20,7 @@ const AllBlogs = () => {
         params: { q: query }
       });
 
+      console.log(" data is here",data)
       if (Array.isArray(data)) {
         const formatted = data.map(blog => ({
           ...blog,
@@ -73,7 +74,7 @@ const AllBlogs = () => {
   const indexOfLastBlog = currentPage * blogsPerPage;
   const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
   const currentBlogs = sortedBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
-
+ console.log("current blogs ",currentBlogs);
   const totalPages = Math.ceil(sortedBlogs.length / blogsPerPage);
 
   // Generate pagination numbers with ellipsis
@@ -109,6 +110,7 @@ const AllBlogs = () => {
     return pageNumbers;
   };
 
+  console.log("current blogs",currentBlogs);
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header with Title */}

@@ -49,10 +49,17 @@ const LatestBlogs = () => {
         });
   };
 
-  const getExcerpt = (content, length = 120) => {
-    if (!content) return "Read this latest post to know more...";
-    return content.length > length ? content.slice(0, length) + "..." : content;
-  };
+// Remove HTML + return clean excerpt
+const getExcerpt = (content, length = 120) => {
+  if (!content) return "Read this latest post to know more...";
+
+  // Create a temporary element to strip HTML
+  const temp = document.createElement("div");
+  temp.innerHTML = content;
+  const text = temp.textContent || temp.innerText || "";
+
+  return text.length > length ? text.slice(0, length) + "..." : text;
+};
 
   return (
     <section className="py-16 bg-gradient-to-b from-white via-blue-50/40 to-white">
