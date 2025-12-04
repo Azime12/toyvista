@@ -80,6 +80,11 @@ const SubCategory = () => {
   const getSlug = (subcategory) =>
     subcategory.slug || subcategory.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
+  useEffect(() => {
+  // Scroll to top whenever the component mounts or category changes
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}, [category]); // dependency: scroll whenever category changes
+
   /**
    * ============================
    *        LOADING UI

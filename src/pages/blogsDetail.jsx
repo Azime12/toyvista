@@ -19,6 +19,7 @@ import {
   Layers
 } from 'lucide-react';
 import { BASE_URL } from '../constants/apiTags';
+import { useRef } from 'react';
 
 const BlogDetail = () => {
   const location = useLocation();
@@ -27,6 +28,7 @@ const BlogDetail = () => {
   const [recentBlogs, setRecentBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [relatedBlogs, setRelatedBlogs] = useState([]);
+const topRef = useRef(null);
 
   // Format a blog with date and readTime
   const formatBlog = (b) => {
@@ -78,39 +80,45 @@ const BlogDetail = () => {
     return tags.length > 0 ? tags : ['General', 'Blog', 'Article'];
   };
 
-  const calculateReadTime = (content) => {
-    const text = content?.replace(/<[^>]*>/g, '') || '';
-    const wordsPerMinute = 200;
-    const words = text.split(/\s+/).length;
-    return `${Math.max(1, Math.ceil(words / wordsPerMinute))} min read`;
+
+
+
+
+  useEffect(() => {
+  const fetchBlog = async () => {
+    setLoading(true);
+    try {
+      const blogFromState = location.state?.blog;
+      let fetchedBlog = null;
+
+      if (blogFromState) {
+        fetchedBlog = blogFromState;
+      } else {
+        const response = await axios.get(`${BASE_URL}/blogs.php`);
+        if (response.data && Array.isArray(response.data)) {
+          fetchedBlog = response.data.find(b => b.slug === slug) || null;
+        }
+      }
+
+      if (fetchedBlog) {
+        setBlog(formatBlog(fetchedBlog));
+      } else {
+        setBlog(null);
+      }
+
+      // 🔹 Scroll to top after blog is set
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error('Error fetching blog:', error);
+      setBlog(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Load current blog
-  useEffect(() => {
-    const fetchBlog = async () => {
-      setLoading(true);
-      try {
-        // First try to get from state
-        const blogFromState = location.state?.blog;
-        if (blogFromState) {
-          setBlog(formatBlog(blogFromState));
-        } else {
-          // If not in state, fetch all blogs and find by slug
-          const response = await axios.get(`${BASE_URL}/blogs.php`);
-          if (response.data && Array.isArray(response.data)) {
-            const foundBlog = response.data.find(b => b.slug === slug);
-            setBlog(formatBlog(foundBlog || null));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching blog:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  fetchBlog();
+}, [location.state, slug]);
 
-    fetchBlog();
-  }, [location.state, slug]);
 
   // Fetch recent blogs
   useEffect(() => {
@@ -164,6 +172,25 @@ const BlogDetail = () => {
     alert('Link copied to clipboard!');
   };
 
+  const generateTagsFromTitle = (title) => {
+  if (!title) return [];
+
+  // Split title into words
+  const words = title
+    .toLowerCase()
+    .match(/\b\w+\b/g) || [];
+
+  // Filter out very short/common words
+  const commonWords = ['the', 'and', 'for', 'with', 'from', 'this', 'that', 'your', 'has', 'have', 'are', 'but', 'not', 'you', 'all', 'can', 'use', 'will', 'a', 'an', 'of', 'in', 'on', 'to', 'at', 'by', 'is'];
+  const filtered = words.filter(w => w.length > 3 && !commonWords.includes(w));
+
+  // Remove duplicates
+  const uniqueWords = [...new Set(filtered)];
+
+  // Limit number of tags to 10
+  return uniqueWords.slice(0, 10).map(w => w.charAt(0).toUpperCase() + w.slice(1));
+};
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50">
@@ -207,7 +234,7 @@ const BlogDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-emerald-50">
+<div ref={topRef} className="min-h-screen bg-gradient-to-b from-gray-50 to-emerald-50">
       {/* Navigation Breadcrumbs */}
       <div className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur-lg">
         <div className="container px-4 py-4 mx-auto">
@@ -297,7 +324,23 @@ const BlogDetail = () => {
                 }}
               />
 
-              {/* Tags */}
+{generateTagsFromTitle(blog.title).length > 0 && (
+  <div className="pt-8 mt-8 border-t border-gray-200">
+    <h3 className="mb-4 font-semibold text-gray-900">Article Tags</h3>
+    <div className="flex flex-wrap gap-2">
+      {generateTagsFromTitle(blog.title).map((tag, i) => (
+        <span 
+          key={i} 
+          className="px-4 py-2 text-sm font-medium border rounded-full bg-emerald-50 text-emerald-700 border-emerald-100"
+        >
+          #{tag}
+        </span>
+      ))}
+    </div>
+  </div>
+)}
+
+              {/* Tags
               {blog.tags?.length > 0 && (
                 <div className="pt-8 mt-8 border-t border-gray-200">
                   <h3 className="mb-4 font-semibold text-gray-900">Article Tags</h3>
@@ -309,7 +352,7 @@ const BlogDetail = () => {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </article>
 
             {/* Share Section */}
